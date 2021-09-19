@@ -10,13 +10,13 @@ export class Customer extends Person {
 
     @OneToOne(() => ProductList, productList => productList.customer)
     @JoinColumn()
-    productList: ProductList;
+    productList?: ProductList;
 
     // Create Date
     @CreateDateColumn()
-    createdAt:Date;
+    createdAt?:Date;
 
     // Update Date
     @UpdateDateColumn()
-    updatedAt:Date;
+    updatedAt?:Date;
 }

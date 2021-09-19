@@ -19,6 +19,7 @@ import { checkoutCartRouter } from "./routes/checkout_cart";
 import { getCartRouter } from "./routes/get_cart"; 
 import { updateCustomerRouter } from "./routes/update_customer";
 import { updateProductRouter } from "./routes/update_product";
+
 config();
 
 const app = express();

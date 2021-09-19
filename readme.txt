@@ -1,4 +1,3 @@
-
 Hello! Thank you very much for taking the time to review this backend coding task.
 
 This application utilizes Node.js, TypeScript, TypeORM and Postgres.
@@ -9,9 +8,9 @@ This is an online shop that has the following features:
 - Search by title and description
     - Can search by either attribute *or* both.
 - Checkout process
-    - ProductLists start out with the "cart" attribute and later receive the "order" attribute in the checkout process.
-- Additonal functionality
-    - Please refer to the "routes" folder for all addtional functionality.
+    - ProductLists start out with the "cart" attribute and later receive the "order" attribute during the checkout process.
+- Additional functionality
+    - Please refer to the "routes" folder for all additional functionality.
 
 *** Steps to get started ***:
 
@@ -19,14 +18,14 @@ This is an online shop that has the following features:
 2.) Install Postico: https://eggerapps.at/postico/
 3.) Install Postman: https://www.postman.com/downloads/
 4.) Create a database in Postico called "shopdb".
-5.) Verift your database name, password, and port match what is shown in the .env file.
+5.) Verify your database name, password, and port match what is shown in the .env file.
 6.) Execute "npm i" in the project directory.
 7.) Execute "npm run dev" in terminal from source code folder.
-8.) Import the provided Postman JSON file in /postman: "ts-shop-db.postman_collection.json"
-9.) Use Postman to explore the functionality of the app.
+8.) As a means of convenience, a Postman JSON file containing example route usage has been provided in /postman: "ts-shop-db.postman_collection.json"
+9.) Use the provided Postman file to explore the functionality of the app.
 
 
-Some potential addtions for consideration:
+Some potential additions for consideration:
 - uuid's instead of id's.
 - Unit testing.
 - Session/httpOnly cookie (attributes of session like "customerId" would be contained here and used for all api calls).

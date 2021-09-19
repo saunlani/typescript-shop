@@ -32,44 +32,60 @@ router.put('/api/customer/update', async (req, res) => {
             // Customer exists
             else {
 
-                // Iterate through req.body and search for a matching key which is common in both req.body and customer: i.e. "firstName"
-                // For all matches: update the customer, save the update and finally provide feedback to frontend.
 
-                for (const key of Object.keys(req.body)) {
+                // Email is a unique field, so attempt to find an existing customer with the req.body's email.
+                const existingCustomer = await Customer.createQueryBuilder("Customer")
+                    .where("Customer.email = :email", { email: email })
+                    .getOne();
 
-                    if (key in customer) {
+                // If an email is found, try to match it based on ID's.
+                // If a match is not found, inform the frotnend that the email is already being used by another customer.
+                if (existingCustomer?.id !== customer.id) {
+                    return res.json({ msg: "Customer not updated: A customer with this email already exists.", customer });
+                }
 
-                        if (key === 'firstName') {
-                            customer.firstName = req.body[key];
-                            updateMade = true;
-                        }
-                        if (key === 'lastName') {
-                            customer.lastName = req.body[key];
-                            updateMade = true;
-                        }
-                        if (key === 'email') {
-                            customer.email = req.body[key];
-                            updateMade = true;
-                        }
-                        if (key === 'cardNumber') {
-                            customer.cardNumber = req.body[key];
-                            updateMade = true;
-                        }
-                        if (key === 'active') {
-                            customer.active = req.body[key];
-                            updateMade = true;
+                else {
+
+                    // Iterate through req.body and search for a matching key which is common in both req.body and customer: i.e. "firstName"
+                    // For all matches: update the customer, save the update and finally provide feedback to frontend.
+
+                    for (const key of Object.keys(req.body)) {
+
+                        if (key in customer) {
+
+                            if (key === 'firstName') {
+                                customer.firstName = req.body[key];
+                                updateMade = true;
+                            }
+                            if (key === 'lastName') {
+                                customer.lastName = req.body[key];
+                                updateMade = true;
+                            }
+                            if (key === 'email') {
+                                customer.email = req.body[key];
+                                updateMade = true;
+
+                            }
+                            if (key === 'cardNumber') {
+                                customer.cardNumber = req.body[key];
+                                updateMade = true;
+                            }
+                            if (key === 'active') {
+                                customer.active = req.body[key];
+                                updateMade = true;
+                            }
                         }
                     }
-                }
-                // Either way, provide feedback to frontend.
-                if (updateMade) {
-                    await customer.save();
-                    return res.json({ msg: "Customer updated", customer });
-                }
-                else {
-                    return res.json({ msg: "Customer not updated", customer });
-                }
+                    // Either way, provide feedback to frontend.
+                    if (updateMade) {
+                        await customer.save();
+                        return res.json({ msg: "Customer updated", customer });
+                    }
+                    else {
+                        return res.json({ msg: "Customer not updated", customer });
+                    }
 
+                }
             }
         }
     }

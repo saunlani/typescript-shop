@@ -69,7 +69,7 @@ router.post('/api/cart/remove/', async (req, res) => {
                 })
 
                 if (!cartProduct) {
-                    return res.json('Product does not exist in cart.');
+                    return res.json({msg:'Product does not exist in cart.', cart});
                 }
 
                 else {
@@ -79,7 +79,7 @@ router.post('/api/cart/remove/', async (req, res) => {
                         cartProduct.remove();
                         cart.total = Number(await ProductListUtility.totalPrices(cart))
                         await ProductList.save(cart);
-                        return res.json('product(s) removed from cart');
+                        return res.json({msg:'Product(s) removed from cart.', cart});
                     }
 
 
@@ -91,7 +91,7 @@ router.post('/api/cart/remove/', async (req, res) => {
                         cart.total = Number(await ProductListUtility.totalPrices(cart))
                         await ProductList.save(cart);
 
-                        return res.json('product(s) removed from cart');
+                        return res.json({msg:'Product(s) removed from cart.', cart});
                     }
                 }
             }

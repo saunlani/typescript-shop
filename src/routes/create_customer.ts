@@ -27,7 +27,8 @@ router.post('/api/customer', async (req, res) => {
     }
 
     // Catch any errors and return it to the frontend.
-    catch (error) {
+    catch (error:any) {
+
 
         // In the event the customer already exists, notify the frontend.
         if (error.toString().includes('duplicate key value violates unique constraint')) {
