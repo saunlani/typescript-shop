@@ -40,7 +40,9 @@ router.put('/api/customer/update', async (req, res) => {
 
                 // If an email is found, try to match it based on ID's.
                 // If a match is not found, inform the frotnend that the email is already being used by another customer.
-                if (existingCustomer?.id !== customer.id) {
+                if (existingCustomer && existingCustomer?.id !== customer.id) {
+                    console.log(existingCustomer)
+                    console.log(customer)
                     return res.json({ msg: "Customer not updated: A customer with this email already exists.", customer });
                 }
 

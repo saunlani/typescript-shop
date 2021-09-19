@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "5ab9c84d-7954-43e8-be0f-3055bdffee67",
+		"_postman_id": "dc8443d4-c31e-41f5-a20e-7c4cc8833ed1",
 		"name": "ts-shop-db",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -245,35 +245,6 @@
 			"response": []
 		},
 		{
-			"name": "Create Customer 2",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"firstName\": \"Sophia\",\n    \"lastName\": \"Klein\",\n    \"email\": \"sklein@gmail.com\",\n    \"cardNumber\": \"0987654321\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8181/api/customer",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8181",
-					"path": [
-						"api",
-						"customer"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Create Customer",
 			"request": {
 				"method": "POST",
@@ -303,13 +274,42 @@
 			"response": []
 		},
 		{
+			"name": "Create Customer 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Sophia\",\n    \"lastName\": \"Klein\",\n    \"email\": \"sklein@gmail.com\",\n    \"cardNumber\": \"0987654321\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8181/api/customer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"api",
+						"customer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Update Customer",
 			"request": {
 				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"customerId\": \"1\",\n    \"active\": true,\n    \"firstName\": \"Paul\",\n    \"lastName\": \"Herz\",\n    \"email\": \"pherz@gmail.com\",\n    \"cardNumber\": \"1234567899\"\n}",
+					"raw": "{\n    \"customerId\": \"1\",\n    \"active\": true,\n    \"firstName\": \"Paul\",\n    \"lastName\": \"Herz\",\n    \"email\": \"pherz2@gmail.com\",\n    \"cardNumber\": \"1234567899\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
