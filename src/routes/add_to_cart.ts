@@ -7,33 +7,24 @@ import { ProductListUtility } from '../entities/module/ProductListUtility';
 import { ProductService } from '../services/ProductService';
 import { CustomerService } from '../services/CustomerService';
 import { ProductListService } from '../services/ProductListService';
-
-let product: Product;
-let cart: any;
-let customer: Customer;
-let cartProduct: ProductListProduct | undefined;
+import { validateSchema } from '../middlewares/validateSchema';
+import { addToCartSchema } from '../validations/addToCartSchema';
 
 const router = express.Router();
 
+var product: Product;
+var cart: any;
+var customer: Customer;
+var cartProduct: ProductListProduct | undefined;
 
-router.post('/api/cart/add/', async (req, res) => {
+router.post('/api/cart/add/', validateSchema(addToCartSchema), async (req, res) => {
+
 
     // With the request body parameters: attempt to find a valid product, customer and ProductList (cart).
     // If one does not exist, return a message to the frontend.
     const { customerId, productId, quantity } = req.body;
 
     try {
-
-        // Verify all required parameters are received.
-        if (!customerId || !productId || !quantity) {
-            return res.status(400).json({ msg: "All required parameters not provided." });
-        }
-
-        else if (quantity < 1) {
-            return res.status(400).json({ msg: "A quantity larger than 0 must be provided." });
-        }
-
-        else {
 
             product = await new ProductService().findProduct(productId);
             customer = await new CustomerService().findCustomer(customerId);
@@ -82,9 +73,6 @@ router.post('/api/cart/add/', async (req, res) => {
 
             return res.status(404).json({ msg: 'No update made to cart.' });
         }
-
-    }
-
 
     // Catch any errors and return it to the frontend.
     catch (error) {
