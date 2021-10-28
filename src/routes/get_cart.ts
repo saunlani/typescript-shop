@@ -14,7 +14,7 @@ router.post('/api/cart/get', async (req, res) => {
 
         // Verify all valid parameters are received.
         if (!customerId) {
-            return res.json({ msg: "Valid parameters not provided." });
+            return res.status(400).json({ msg: "Valid parameters not provided." });
         }
 
 
@@ -23,13 +23,11 @@ router.post('/api/cart/get', async (req, res) => {
             const customer = await Customer.findOne(parseInt(customerId));
 
             if (!customer) {
-                return res.json({ msg: 'This customer does not exist.' });
+                return res.status(404).json({ msg: 'This customer does not exist.' });
             }
 
             else if (customer.active === false) {
-                return res.json({
-                    msg: "Customer is inactive."
-                })
+                return res.status(404).json({ msg: "Customer is inactive." })
             }
 
             else {
@@ -41,14 +39,14 @@ router.post('/api/cart/get', async (req, res) => {
 
                 // If ProductList (cart) doesn't exist, notify the frontend.
                 if (!cart) {
-                    return res.json({ msg: 'A cart does not exist for this customer.' });
+                    return res.status(404).json({ msg: 'A cart does not exist for this customer.' });
                 }
 
                 // Existing ProductList (cart) must exist, so return it to frontend.
                 else {
 
                     const cartProducts = await ProductListProduct.find({ where: { productList: cart } })
-                    return res.json({ cart, cartProducts });
+                    return res.status(200).json({ cart, cartProducts });
                 }
 
             }
@@ -58,7 +56,7 @@ router.post('/api/cart/get', async (req, res) => {
     // Catch any other errors and return it to the frontend.
     catch (e) {
         console.error(e);
-        return res.json({ msg: 'Problem encountered while getting cart:', e });
+        return res.status(500).json({ msg: 'Problem encountered while getting cart:', e });
     }
 
 });

@@ -61,6 +61,12 @@ const main = async () => {
         app.use(getCartRouter);
         app.use(updateCustomerRouter);
         app.use(updateProductRouter);
+        app.use((req, res) => {
+            res.status(404).send({
+            status: 404,
+            error: 'Not Found'
+            })
+           })
         app.listen(process.env.serverPort, () => {
             console.log("server now running on port:",process.env.serverPort)
         })

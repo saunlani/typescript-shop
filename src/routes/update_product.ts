@@ -12,7 +12,7 @@ router.put('/api/product/update', async (req, res) => {
 
         // Verify all valid parameters are received.
         if (!productId) {
-            return res.json({ msg: "All valid parameters not provided." });
+            return res.status(400).json({ msg: "All valid parameters not provided." });
         }
         else {
 
@@ -24,9 +24,7 @@ router.put('/api/product/update', async (req, res) => {
 
             // If product does not exist, notify the frontend.
             if (!product) {
-                return res.json({
-                    msg: "Product does not exist."
-                })
+                return res.status(404).json({ msg: "Product does not exist." })
             }
 
             // Product exists
@@ -63,10 +61,10 @@ router.put('/api/product/update', async (req, res) => {
                 // Either way, provide feedback to frontend.
                 if (updateMade) {
                     await product.save();
-                    return res.json({ msg: "Product updated.", product });
+                    return res.status(200).json({ msg: "Product updated.", product });
                 }
                 else {
-                    return res.json({ msg: "Product not updated.", product });
+                    return res.status(404).json({ msg: "Product not updated.", product });
                 }
 
             }
@@ -76,7 +74,7 @@ router.put('/api/product/update', async (req, res) => {
     // Catch any errors and return it to the frontend.
     catch (error) {
         console.error(error)
-        return res.json({ msg: 'Problem encountered while updating product: ', error });
+        return res.status(500).json({ msg: 'Problem encountered while updating product: ', error });
 
     }
 });

@@ -12,7 +12,7 @@ router.put('/api/customer/update', async (req, res) => {
 
         // Verify all valid parameters are received.
         if (!customerId) {
-            return res.json({ msg: "All valid parameters not provided." });
+            return res.status(400).json({ msg: "All valid parameters not provided." });
         }
         else {
 
@@ -24,9 +24,7 @@ router.put('/api/customer/update', async (req, res) => {
 
             // If customer does not exist, notify the frontend.
             if (!customer) {
-                return res.json({
-                    msg: "Customer does not exist."
-                })
+                return res.status(404).json({ msg: "Customer does not exist." })
             }
 
             // Customer exists
@@ -43,7 +41,7 @@ router.put('/api/customer/update', async (req, res) => {
                 if (existingCustomer && existingCustomer?.id !== customer.id) {
                     console.log(existingCustomer)
                     console.log(customer)
-                    return res.json({ msg: "Customer not updated: A customer with this email already exists.", customer });
+                    return res.status(404).json({ msg: "Customer not updated: A customer with this email already exists.", customer });
                 }
 
                 else {
@@ -81,10 +79,10 @@ router.put('/api/customer/update', async (req, res) => {
                     // Either way, provide feedback to frontend.
                     if (updateMade) {
                         await customer.save();
-                        return res.json({ msg: "Customer updated", customer });
+                        return res.status(200).json({ msg: "Customer updated", customer });
                     }
                     else {
-                        return res.json({ msg: "Customer not updated", customer });
+                        return res.status(404).json({ msg: "Customer not updated", customer });
                     }
 
                 }
@@ -95,7 +93,7 @@ router.put('/api/customer/update', async (req, res) => {
     // Catch any errors and return it to the frontend.
     catch (error) {
         console.error(error)
-        return res.json({ msg: 'Problem encountered while updating customer: ', error });
+        return res.status(500).json({ msg: 'Problem encountered while updating customer: ', error });
 
     }
 });

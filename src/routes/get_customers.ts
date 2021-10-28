@@ -13,13 +13,13 @@ router.get('/api/customers', async (req, res) => {
             .from(Customer, 'customer')
             .getMany()
 
-        return res.json(customers)
+        return res.status(200).json(customers)
     }
 
     // Catch any other errors and return it to the frontend.
     catch (error) {
         console.error(error)
-        return res.json({ msg: 'Problem encountered while getting customers:', error });
+        return res.status(500).json({ msg: 'Problem encountered while getting customers:', error });
     }
 })
 

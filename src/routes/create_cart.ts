@@ -15,7 +15,7 @@ router.post('/api/cart/', async (req, res) => {
 
         // Verify all valid parameters are received.
         if (!customerId) {
-            return res.json({ msg: "Valid parameters not provided." });
+            return res.status(400).json({ msg: "Valid parameters not provided." });
         }
         else {
 
@@ -30,22 +30,16 @@ router.post('/api/cart/', async (req, res) => {
 
             // If customer does not exist, notify frontend.
             if (!customer) {
-                return res.json({
-                    msg: "Customer not found."
-                })
+                return res.status(404).json({ msg: "Customer not found." })
             }
 
             else if (customer.active === false) {
-                return res.json({
-                    msg: "Customer is inactive."
-                })
+                return res.status(404).json({ msg: "Customer is inactive." })
             }
             
             // If ProductList (cart) exists, notify frontend.
             else if (existingCart) {
-                return res.json({
-                    msg: "Cart already exists for this customer."
-                })
+                return res.status(404).json({ msg: "Cart already exists for this customer." })
             }
 
             // Create ProductList (cart) for this customer.
@@ -60,21 +54,19 @@ router.post('/api/cart/', async (req, res) => {
 
                 await cart.save();
 
-                return res.json({ msg: "Cart successfully created.", cart })
+                return res.status(201).json({ msg: "Cart successfully created.", cart })
             }
 
             // If error occurs.
             else {
-                return res.json({
-                    msg: "Error occurred."
-                })
+                return res.status(500).json({ msg: "Error occurred." })
             }
         }
     }
 
     // Catch any other errors and return it to the frontend.
     catch (error) {
-        return res.json({ msg: 'Problem encountered while creating cart: ', error });
+        return res.status(500).json({ msg: 'Problem encountered while creating cart: ', error });
     }
 
 });

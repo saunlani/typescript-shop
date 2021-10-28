@@ -14,7 +14,7 @@ router.post('/api/cart/checkout/', async (req, res) => {
 
         // Verify all valid parameters are received.
         if (!customerId) {
-            return res.json({ msg: "Valid parameters not provided." });
+            return res.status(400).json({ msg: "Valid parameters not provided." });
         }
         else {
 
@@ -23,15 +23,11 @@ router.post('/api/cart/checkout/', async (req, res) => {
             // If customer doesn't exist, notify frontend.
             if (!customer){
 
-                return res.json({
-                    msg: "Customer does not exist."
-                })
+                return res.status(404).json({ msg: "Customer does not exist." })
             }
 
             else if (customer.active === false) {
-                return res.json({
-                    msg: "Customer is inactive."
-                })
+                return res.status(404).json({ msg: "Customer is inactive." })
             }
 
             // Verify ProductList (cart) exists for customer.
@@ -43,15 +39,11 @@ router.post('/api/cart/checkout/', async (req, res) => {
             // If ProductList (cart) doesn't exist, notify frontend.
             if (!cart) {
 
-                return res.json({
-                    msg: "Cart for this customer not found."
-                })
+                return res.status(404).json({ msg: "Cart for this customer not found." })
             }
 
             else if (cart.total === null || Number(cart.total) === 0) {
-                return res.json({
-                    msg: "Cart is empty for this customer."
-                })
+                return res.status(404).json({ msg: "Cart is empty for this customer." })
             }
 
             // At this point, the customer and ProductList (cart) must both exist.
@@ -70,7 +62,7 @@ router.post('/api/cart/checkout/', async (req, res) => {
                 // Save the ProductList.
                 await ProductList.save(cart);
 
-                return res.json({ msg: 'Successfully processed order.', cart });
+                return res.status(200).json({ msg: 'Successfully processed order.', cart });
             }
 
         }
@@ -78,7 +70,7 @@ router.post('/api/cart/checkout/', async (req, res) => {
 
     // Catch any other errors and return it to the frontend.
     catch (error) {
-        return res.json({ msg: 'Problem encountered while checking out cart:', error });
+        return res.status(500).json({ msg: 'Problem encountered while checking out cart:', error });
     }
 });
 

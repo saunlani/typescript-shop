@@ -18,7 +18,7 @@ router.post('/api/cart/remove/', async (req, res) => {
 
         // Verify all valid parameters are received.
         if (!customerId || !productId) {
-            return res.json({ msg: "Valid parameters not provided." });
+            return res.status(400).json({ msg: "Valid parameters not provided." });
         }
 
         else {
@@ -37,27 +37,19 @@ router.post('/api/cart/remove/', async (req, res) => {
                 .getOne();
 
             if (!cart) {
-                return res.json({
-                    msg: "Cart not found."
-                })
+                return res.status(404).json({ msg: "Cart not found." })
             }
 
             else if (!product) {
-                return res.json({
-                    msg: "Product not found."
-                })
+                return res.status(404).json({ msg: "Product not found." })
             }
 
             else if (!customer) {
-                return res.json({
-                    msg: "Customer not found."
-                })
+                return res.status(404).json({ msg: "Customer not found." })
             }
 
             else if (customer.active === false) {
-                return res.json({
-                    msg: "Customer is inactive."
-                })
+                return res.status(404).json({ msg: "Customer is inactive." })
             }
 
             else {
@@ -69,7 +61,7 @@ router.post('/api/cart/remove/', async (req, res) => {
                 })
 
                 if (!cartProduct) {
-                    return res.json({msg:'Product does not exist in cart.', cart});
+                    return res.status(404).json({msg:'Product does not exist in cart.', cart});
                 }
 
                 else {
@@ -79,7 +71,7 @@ router.post('/api/cart/remove/', async (req, res) => {
                         cartProduct.remove();
                         cart.total = Number(await ProductListUtility.totalPrices(cart))
                         await ProductList.save(cart);
-                        return res.json({msg:'Product(s) removed from cart.', cart});
+                        return res.status(200).json({msg:'Product(s) removed from cart.', cart});
                     }
 
 
@@ -91,7 +83,7 @@ router.post('/api/cart/remove/', async (req, res) => {
                         cart.total = Number(await ProductListUtility.totalPrices(cart))
                         await ProductList.save(cart);
 
-                        return res.json({msg:'Product(s) removed from cart.', cart});
+                        return res.status(200).json({msg:'Product(s) removed from cart.', cart});
                     }
                 }
             }
@@ -101,7 +93,7 @@ router.post('/api/cart/remove/', async (req, res) => {
     // Catch any other errors and return it to the frontend.
     catch (error) {
         console.error(error)
-        return res.json({ msg: 'Problem encountered while getting products: ', error });
+        return res.status(500).json({ msg: 'Problem encountered while getting products: ', error });
     }
 });
 

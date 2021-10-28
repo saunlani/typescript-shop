@@ -17,7 +17,7 @@ router.post('/api/cart/add/', async (req, res) => {
 
         // Verify all valid parameters are received.
         if (!customerId) {
-            return res.json({ msg: "Valid parameters not provided." });
+            return res.status(400).json({ msg: "Valid parameters not provided." });
         }
 
         else {
@@ -29,27 +29,19 @@ router.post('/api/cart/add/', async (req, res) => {
                 .getOne();
 
             if (!cart) {
-                return res.json({
-                    msg: "Cart does not exist for this customer."
-                })
+                return res.status(404).json({ msg: "Cart does not exist for this customer." })
             }
 
             else if (!product) {
-                return res.json({
-                    msg: "Product does not exist."
-                })
+                return res.status(404).json({ msg: "Product does not exist." })
             }
 
             else if (!customer) {
-                return res.json({
-                    msg: "Customer does not exist."
-                })
+                return res.status(404).json({ msg: "Customer does not exist." })
             }
 
             else if (customer.active === false) {
-                return res.json({
-                    msg: "Customer is inactive."
-                })
+                return res.status(404).json({ msg: "Customer is inactive." })
             }
 
             else {
@@ -73,7 +65,7 @@ router.post('/api/cart/add/', async (req, res) => {
 
                     // Update the ProductList (cart).
                     await ProductList.save(cart);
-                    return res.json({ msg: 'Successfully added product(s) to cart.', cart });
+                    return res.status(201).json({ msg: 'Successfully added product(s) to cart.', cart });
 
                 }
 
@@ -91,17 +83,15 @@ router.post('/api/cart/add/', async (req, res) => {
 
                     // Verify ProductList (cart) has updated and return it to the frontend.
                     const updatedCart = await ProductList.findOne(cart.id, { relations: ["productListProduct"] });
-                    return res.json({ msg: 'Successfully added product(s) to cart: ', updatedCart });
+                    return res.status(201).json({ msg: 'Successfully added product(s) to cart: ', updatedCart });
                 }
             }
         }
     }
 
-
-
     // Catch any other errors and return it to the frontend.
     catch (error) {
-        return res.json({ msg: 'Problem encountered while adding to cart:', error });
+        return res.status(500).json({ msg: 'Problem encountered while adding to cart:', error });
     }
 });
 

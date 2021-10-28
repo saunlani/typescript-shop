@@ -12,7 +12,7 @@ router.post("/api/product", async (req, res) => {
     try {
 
         if (!title || !description || !photo || !price) {
-            return res.json({ msg: "All valid parameters not provided" });
+            return res.status(400).json({ msg: "All valid parameters not provided" });
         }
 
         else {
@@ -20,14 +20,14 @@ router.post("/api/product", async (req, res) => {
             const product = Product.create({ title, description, photo, price });
 
             await product.save();
-            return res.json({ msg: "Product successfully created: ", product });
+            return res.status(201).json({ msg: "Product successfully created: ", product });
         }
 
     // Catch any other errors and return it to the frontend.
 
     } catch (error) {
         console.error(error)
-        return res.json({ msg: 'Problem encountered while creating product: ', error });
+        return res.status(500).json({ msg: 'Problem encountered while creating product: ', error });
     }
 })
 

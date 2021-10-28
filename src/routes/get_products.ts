@@ -13,19 +13,19 @@ router.get('/api/products', async (req, res) => {
 
         // If no matching products are found, notify frontend.
         if (products.length === 0) {
-            return res.json({ msg: 'No products exist with this title.' });
+            return res.status(404).json({ msg: 'No products exist with this title.' });
         }
 
         // Otherwise return all matching products.
         else {
-            return res.json(products);
+            return res.status(200).json(products);
         }
 
     }
     // Catch any other errors and return it to the frontend.
     catch (error) {
         console.error(error)
-        return res.json({ msg: 'Problem encountered while getting products: ', error });
+        return res.status(500).json({ msg: 'Problem encountered while getting products: ', error });
     }
 
 })
