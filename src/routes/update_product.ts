@@ -1,7 +1,10 @@
 import express from 'express';
 import { Product } from '../entities/Product'
+import { ProductService } from '../services/ProductService';
 
 const router = express.Router();
+
+let product: Product;
 
 router.put('/api/product/update', async (req, res) => {
 
@@ -10,17 +13,22 @@ router.put('/api/product/update', async (req, res) => {
 
     try {
 
-        // Verify all valid parameters are received.
+        // Verify all required parameters are received.
         if (!productId) {
-            return res.status(400).json({ msg: "All valid parameters not provided." });
+            return res.status(400).json({ msg: "All required parameters not provided." });
         }
-        else {
 
-            const product = await Product.findOne(parseInt(productId));
+        else if (!title && !description &&  !photo && !price ) {
+            return res.status(400).json({ msg: "All required parameters not provided." });
+        }
+
+        else {
 
             // This variable will be updated to true if an update has been made to the product
             // It's used to provide feedback to the frontend.
             var updateMade: boolean = false;
+
+            product = await new ProductService().findProduct(productId);
 
             // If product does not exist, notify the frontend.
             if (!product) {
@@ -66,7 +74,6 @@ router.put('/api/product/update', async (req, res) => {
                 else {
                     return res.status(404).json({ msg: "Product not updated.", product });
                 }
-
             }
         }
     }

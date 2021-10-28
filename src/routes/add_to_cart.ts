@@ -4,8 +4,17 @@ import { ProductList } from '../entities/ProductList'
 import { Product } from '../entities/Product';
 import { Customer } from '../entities/Customer';
 import { ProductListUtility } from '../entities/module/ProductListUtility';
+import { ProductService } from '../services/ProductService';
+import { CustomerService } from '../services/CustomerService';
+import { ProductListService } from '../services/ProductListService';
+
+let product: Product;
+let cart: any;
+let customer: Customer;
+let cartProduct: ProductListProduct | undefined;
 
 const router = express.Router();
+
 
 router.post('/api/cart/add/', async (req, res) => {
 
@@ -15,50 +24,33 @@ router.post('/api/cart/add/', async (req, res) => {
 
     try {
 
-        // Verify all valid parameters are received.
-        if (!customerId) {
-            return res.status(400).json({ msg: "Valid parameters not provided." });
+        // Verify all required parameters are received.
+        if (!customerId || !productId || !quantity) {
+            return res.status(400).json({ msg: "All required parameters not provided." });
+        }
+
+        else if (quantity < 1) {
+            return res.status(400).json({ msg: "A quantity larger than 0 must be provided." });
         }
 
         else {
-            const product = await Product.findOne(parseInt(productId));
-            const customer = await Customer.findOne(parseInt(customerId));
-            const cart = await ProductList.createQueryBuilder("ProductList")
-                .where("ProductList.customerId = :customerId", { customerId: customerId })
-                .andWhere("ProductList.type = :type", { type: "cart" })
-                .getOne();
 
-            if (!cart) {
-                return res.status(404).json({ msg: "Cart does not exist for this customer." })
-            }
+            product = await new ProductService().findProduct(productId);
+            customer = await new CustomerService().findCustomer(customerId);
+            cart = await new ProductListService().findProductList(customerId);
 
-            else if (!product) {
-                return res.status(404).json({ msg: "Product does not exist." })
-            }
+            // We want to always update an existing quantity (if one exist) for a product in the product list, instead of creating duplicate entries.
 
-            else if (!customer) {
-                return res.status(404).json({ msg: "Customer does not exist." })
-            }
+            // First look for an existing product entry with an existing quantity in cart (ProductList).
+            cartProduct = await new ProductListService().findProductListProduct(cart, product);
 
-            else if (customer.active === false) {
-                return res.status(404).json({ msg: "Customer is inactive." })
-            }
+            // If product exists in cart already, just add to the existing quantity.
+            if (cartProduct) {
 
-            else {
+                cartProduct.quantity = Number(cartProduct.quantity) + Number(quantity);
+                await ProductListProduct.save(cartProduct);
 
-                // We want to always update an existing quantity (if one exist) for a product in the product list, instead of creating duplicate entries.
-
-                // First look for an existing product entry with an existing quantity in cart (ProductList).
-                const cartProduct = await ProductListProduct.findOne({
-                    where: { productList: cart, product: product },
-                    relations: ['product'],
-                })
-
-                // If product exists in cart already, just add to the existing quantity.
-                if (cartProduct) {
-
-                    cartProduct.quantity = Number(cartProduct.quantity) + Number(quantity);
-                    await ProductListProduct.save(cartProduct);
+                if (cart) {
 
                     // Generate a total cart price with the ProductListUtility module.
                     cart.total = Number(await ProductListUtility.totalPrices(cart))
@@ -66,32 +58,63 @@ router.post('/api/cart/add/', async (req, res) => {
                     // Update the ProductList (cart).
                     await ProductList.save(cart);
                     return res.status(201).json({ msg: 'Successfully added product(s) to cart.', cart });
-
                 }
 
-                // ProductList (cart) must not currently contain this product, so create a ProductListProduct (cart item), give it a quantity,
-                // save it to the ProductList (cart), then update the total for the ProductList and save it.
-                else {
 
-                    await ProductListProduct.create({ productList: cart, product: product, quantity: quantity, unitPrice: product.price }).save();
-
-                    // Generate a total cart price with the ProductListUtility module.
-                    cart.total = Number(await ProductListUtility.totalPrices(cart))
-
-                    // Save the updated ProductList (cart).
-                    await ProductList.save(cart);
-
-                    // Verify ProductList (cart) has updated and return it to the frontend.
-                    const updatedCart = await ProductList.findOne(cart.id, { relations: ["productListProduct"] });
-                    return res.status(201).json({ msg: 'Successfully added product(s) to cart: ', updatedCart });
-                }
             }
+
+            // ProductList (cart) must not currently contain this product, so create a ProductListProduct (cart item), give it a quantity,
+            // save it to the ProductList (cart), then update the total for the ProductList and save it.
+            else {
+
+                await ProductListProduct.create({ productList: cart, product: product, quantity: quantity, unitPrice: product.price }).save();
+
+                // Generate a total cart price with the ProductListUtility module.
+                cart.total = Number(await ProductListUtility.totalPrices(cart))
+
+                // Save the updated ProductList (cart).
+                await ProductList.save(cart);
+
+                // Verify ProductList (cart) has updated and return it to the frontend.
+                const updatedCart = await ProductList.findOne(cart.id, { relations: ["productListProduct"] });
+                return res.status(201).json({ msg: 'Successfully added product(s) to cart: ', updatedCart });
+            }
+
+            return res.status(404).json({ msg: 'No update made to cart.' });
         }
+
     }
 
-    // Catch any other errors and return it to the frontend.
+
+    // Catch any errors and return it to the frontend.
     catch (error) {
-        return res.status(500).json({ msg: 'Problem encountered while adding to cart:', error });
+
+        let msg: string[] = [];
+
+        if (!customer) {
+            msg.push("Customer does not exist.");
+        }
+
+        if (!product) {
+            msg.push("Product does not exist.");
+        }
+
+        if (!cart) {
+            msg.push("Cart does not exist for this customer.");
+        }
+
+        if (customer && customer.active === false) {
+            msg.push("Customer is inactive.");
+        }
+
+        if (msg.length > 0) {
+            return res.status(404).json({ msg: msg })
+        }
+
+        else {
+            return res.status(500).json({ msg: 'Problem encountered while adding to cart', error });
+        }
+
     }
 });
 
