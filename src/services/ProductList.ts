@@ -35,11 +35,16 @@ export async function addToProductList(productList: ProductList, product: Produc
 
     // First look for an existing product with an existing quantity in cart (ProductList).
     // We want to always update an existing quantity (if one exist) for a product in the cart, instead of creating duplicate entries.
-    let existingProductInCart: ProductListProduct | undefined;
     
-    existingProductInCart = await findProductListProduct(productList, product);
+    let existingProductInCart: ProductListProduct | undefined;
 
-    console.log('test')
+    try {
+        existingProductInCart = await findProductListProduct(productList, product);
+    }
+    catch (error) {
+        // cart does not already contain product
+    }
+
     // If product exists in cart already, just add to the existing quantity and save.
     if (existingProductInCart) {
 
