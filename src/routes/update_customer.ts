@@ -30,7 +30,6 @@ router.put('/api/customer/update', async (req, res) => {
             // Customer exists
             else {
 
-
                 // Email is a unique field, so attempt to find an existing customer with the req.body's email.
                 const existingCustomer = await Customer.createQueryBuilder("Customer")
                     .where("Customer.email = :email", { email: email })
@@ -39,8 +38,6 @@ router.put('/api/customer/update', async (req, res) => {
                 // If an email is found, try to match it based on ID's.
                 // If a match is not found, inform the frotnend that the email is already being used by another customer.
                 if (existingCustomer && existingCustomer?.id !== customer.id) {
-                    console.log(existingCustomer)
-                    console.log(customer)
                     return res.status(404).json({ msg: "Customer not updated: A customer with this email already exists.", customer });
                 }
 

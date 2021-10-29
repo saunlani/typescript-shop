@@ -1,4 +1,4 @@
-export module Controller {
+
     // passes errors to express error middleware
 export const errorHandler = (fn) => async (req, res, next) => {
     try {
@@ -7,4 +7,3 @@ export const errorHandler = (fn) => async (req, res, next) => {
       next(e);
     }
   };
-}
