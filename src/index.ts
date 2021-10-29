@@ -16,7 +16,7 @@ import { createCartRouter } from "./routes/create_cart";
 import { addToCartRouter } from "./routes/add_to_cart";
 import { removeFromCartRouter } from "./routes/remove_from_cart";
 import { checkoutCartRouter } from "./routes/checkout_cart";
-import { getCartRouter } from "./routes/get_cart"; 
+import { getCartRouter } from "./routes/get_cart";
 import { updateCustomerRouter } from "./routes/update_customer";
 import { updateProductRouter } from "./routes/update_product";
 
@@ -28,22 +28,23 @@ const main = async () => {
 
     try {
 
-     await createConnection({
-        type:"postgres",
-        host:process.env.dbHost,
-        port: Number(process.env.dbPort),
-        username:process.env.dbUsername,
-        password:process.env.dbPassword,
-        database: process.env.dbDatabaseName,
-        entities: [Customer, Product, ProductList, ProductListProduct],
-        synchronize:true
-    }) 
-    console.log('successful connection to database')
-}
+        await createConnection({
+            type: "postgres",
+            host: process.env.dbHost,
+            port: Number(process.env.dbPort),
+            username: process.env.dbUsername,
+            password: process.env.dbPassword,
+            database: process.env.dbDatabaseName,
+            entities: [Customer, Product, ProductList, ProductListProduct],
+            synchronize: true
+        })
+        console.log('successful connection to database')
+    }
 
     catch (e) {
-        console.error(e,'database connection failure')
+        console.error(e, 'database connection failure')
     }
+
 
     try {
         app.use(express.json())
@@ -61,20 +62,18 @@ const main = async () => {
         app.use(getCartRouter);
         app.use(updateCustomerRouter);
         app.use(updateProductRouter);
-        app.use((req, res) => {
-            res.status(404).send({
-            status: 404,
-            error: 'Not Found'
-            })
-           })
         app.listen(process.env.serverPort, () => {
-            console.log("server now running on port:",process.env.serverPort)
+            console.log("server now running on port:", process.env.serverPort)
         })
+        app.use(function (err, req, res, next) {
+            res.status(500).json({ 'msg': err.message })
+        });
     }
-    catch (e) {
-        console.error(e,'server creation failure')
+
+    catch (error) {
+
+        console.log("failed to create server:", error)
     }
 
 }
-
 main();
