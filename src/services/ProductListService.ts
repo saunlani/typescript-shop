@@ -38,6 +38,7 @@ export class ProductListService {
         }
         // Existing product in cart does not exist.
         catch (error) {
+            return undefined;
         }
 
         // If product exists in cart already, just add to the existing quantity and save.
@@ -74,7 +75,6 @@ export class ProductListService {
         }
         return productList;
     }
-
 
     // Used to remove products from cart.
     public async removeProductFromProductList(productList: ProductList, product: Product, quantity: Number): Promise<ProductList | undefined> {

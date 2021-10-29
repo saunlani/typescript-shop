@@ -1,9 +1,4 @@
 import express from 'express';
-import { ProductListProduct } from "../entities/ProductListProduct";
-import { ProductList } from '../entities/ProductList'
-import { Product } from '../entities/Product';
-import { Customer } from '../entities/Customer';
-import { ProductListUtility } from '../entities/module/ProductListUtility';
 import { ProductService } from '../services/ProductService';
 import { CustomerService } from '../services/CustomerService';
 import { ProductListService } from '../services/ProductListService';
@@ -24,19 +19,17 @@ router.post('/api/cart/add/', validateSchema(addToCartSchema), Controller.errorH
     const customerService = new CustomerService();
     const productListService = new ProductListService();
 
-        const product = await productService.findProduct(productId);
-        const customer = await customerService.findCustomer(customerId);
-        const cart = await productListService.findProductList(customerId);
+    const product = await productService.findProduct(productId);
+    const customer = await customerService.findCustomer(customerId);
+    const cart = await productListService.findProductList(customerId);
 
-        if (!cart) {
-            // handle undefined case, possibly throw an error
-        } else {
-            await productListService.addToProductList(cart, product, quantity);
-        }
-        return res
-            .status(201)
-            .json({ msg: "Successfully added product(s) to cart: ", cart });
-
+    if (!cart) {
+        // handle undefined case, possibly throw an error
+    } else {
+        await productListService.addToProductList(cart, product, quantity);
+    }
+    return res.status(201).json({ msg: "Successfully added product(s) to cart: ", cart });
+    
 }))
 
 export {

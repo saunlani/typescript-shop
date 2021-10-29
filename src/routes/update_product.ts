@@ -1,90 +1,32 @@
 import express from 'express';
 import { Product } from '../entities/Product'
 import { ProductService } from '../services/ProductService';
+import { ProductListService } from '../services/ProductListService';
+import { validateSchema } from '../middlewares/validateSchema';
+import { updateProductSchema } from '../validations/updateProductSchema';
+import { Controller } from './controllers/Controller';
 
 const router = express.Router();
 
-let product: Product;
+router.put('/api/product/update', validateSchema(updateProductSchema), Controller.errorHandler(async (req, res, next) => {
 
-router.put('/api/product/update', async (req, res) => {
+    const productService = new ProductService();
 
     // With the request body parameters: attempt to find and update a product.
     const { productId, title, description, photo, price } = req.body;
 
-    try {
+    const product = await productService.updateProduct(productId, title, description, photo, price);
 
-        // Verify all required parameters are received.
-        if (!productId) {
-            return res.status(400).json({ msg: "All required parameters not provided." });
-        }
-
-        else if (!title && !description &&  !photo && !price ) {
-            return res.status(400).json({ msg: "All required parameters not provided." });
-        }
-
-        else {
-
-            // This variable will be updated to true if an update has been made to the product
-            // It's used to provide feedback to the frontend.
-            var updateMade: boolean = false;
-
-            product = await new ProductService().findProduct(productId);
-
-            // If product does not exist, notify the frontend.
-            if (!product) {
-                return res.status(404).json({ msg: "Product does not exist." })
-            }
-
-            // Product exists
-            else {
-
-                // Iterate through req.body and search for a matching key which is common in both req.body and product: i.e. "title"
-                // For all matches: update the product, save the update and finally provide feedback to frontend.
-
-                for (const key of Object.keys(req.body)) {
-
-                    if (key in product) {
-
-                        // console.log('key', key);
-                        // console.log('value', req.body[key])
-
-                        if (key === 'title') {
-                            product.title = req.body[key];
-                            updateMade = true;
-                        }
-                        if (key === 'description') {
-                            product.description = req.body[key];
-                            updateMade = true;
-                        }
-                        if (key === 'photo') {
-                            product.photo = req.body[key];
-                            updateMade = true;
-                        }
-                        if (key === 'price') {
-                            product.price = req.body[key];
-                            updateMade = true;
-                        }
-                    }
-                }
-                // Either way, provide feedback to frontend.
-                if (updateMade) {
-                    await product.save();
-                    return res.status(200).json({ msg: "Product updated.", product });
-                }
-                else {
-                    return res.status(404).json({ msg: "Product not updated.", product });
-                }
-            }
-        }
+    // If product does not exist, notify the frontend.
+    if (!product) {
+        return res.status(404).json({ msg: "Product does not exist." })
     }
 
-    // Catch any errors and return it to the frontend.
-    catch (error) {
-        console.error(error)
-        return res.status(500).json({ msg: 'Problem encountered while updating product: ', error });
-
+    // Product exists
+    else {
+        return res.status(200).json({ msg: "Update processed.", product });
     }
-});
+}))
 
 export {
     router as updateProductRouter
