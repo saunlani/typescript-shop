@@ -12,7 +12,12 @@ export async function findProductList(customerId: string): Promise<ProductList |
         .andWhere("ProductList.type = :type", { type: "cart" })
         .getOne();
 
-    return foundProductList;
+        if (!foundProductList) {
+            return undefined
+        }
+        else {
+            return foundProductList;
+        }
 }
 
 // Used to find an existing product in a cart.
@@ -22,7 +27,6 @@ export async function findProductListProduct(productList: ProductList, product: 
         where: { productList: productList, product: product },
         relations: ['product'],
     })
-
     return foundCartProduct;
 }
 
@@ -32,14 +36,10 @@ export async function addToProductList(productList: ProductList, product: Produc
     // First look for an existing product with an existing quantity in cart (ProductList).
     // We want to always update an existing quantity (if one exist) for a product in the cart, instead of creating duplicate entries.
     let existingProductInCart: ProductListProduct | undefined;
-    try {
-        existingProductInCart = await findProductListProduct(productList, product);
-    }
-    // Existing product in cart does not exist.
-    catch (error) {
-        return undefined;
-    }
+    
+    existingProductInCart = await findProductListProduct(productList, product);
 
+    console.log('test')
     // If product exists in cart already, just add to the existing quantity and save.
     if (existingProductInCart) {
 
