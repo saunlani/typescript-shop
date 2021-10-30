@@ -1,4 +1,4 @@
-Hello! Thank you very much for taking the time to review this backend coding task.
+Hello! Thank you very much for taking the time to review this backend coding project.
 
 This application utilizes Node.js, TypeScript, TypeORM and Postgres.
 
@@ -37,5 +37,3 @@ Some potential additions for consideration:
 - Shipping during checkout process? - are we selling digital or physical inventory?
 - Seller entity? If we decide to create an ebay-type online shop, we could inherit the Person entity and create a Seller.
     - Products would be associated with a Seller.
-- Optimize the update routes: maybe use a library like Zod (https://github.com/colinhacks/zod) to validate user input.
-- Follow conventional REST rules more strictly.
