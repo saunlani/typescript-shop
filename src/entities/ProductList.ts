@@ -16,7 +16,7 @@ export class ProductList extends BaseEntity {
 
     // Customer
     @Column('integer') customerId: number;
-    @Column({ nullable: true }) cardNumber: string;
+    @Column({ nullable: true }) cardNumber: number;
     @ManyToOne(() => Customer, customer => customer.productList)
     customer: Customer;
 

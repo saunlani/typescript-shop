@@ -23,10 +23,10 @@ export class Person extends BaseEntity {
     email: string;
 
     // Card Number
-    @Column({
-        length: 10
+    @Column("varchar",{
+        length: 16
     })
-    cardNumber: string;
+    cardNumber: number;
 
     // Active status
     @Column({default: true})

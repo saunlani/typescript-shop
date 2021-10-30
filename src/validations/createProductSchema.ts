@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-export const productSchema = yup.object({
+export const createProductSchema = yup.object({
         title: yup
             .string()
             .defined(),
@@ -11,6 +11,6 @@ export const productSchema = yup.object({
             .string()
             .defined(),
         price: yup
-            .number()
-            .defined(),
+            .number().min(.01)
+            .defined()
     });

@@ -2,25 +2,91 @@ import { Product } from 'src/entities/Product';
 import { ProductList } from '../entities/ProductList'
 import { ProductListProduct } from '../entities/ProductListProduct'
 import { ProductListUtility } from '../entities/module/ProductListUtility';
+import { findCustomer } from './Customer';
+import { Customer } from '../entities/Customer';
 
+// Find a cart or an order.
+export async function createProductList(customerId: number, cartOrOrder: string): Promise<ProductList> {
 
-// Used to find a cart or an order.
-export async function findProductList(customerId: string): Promise<ProductList | undefined> {
+    let customer = await findCustomer((customerId));
 
-    const foundProductList = await ProductList.createQueryBuilder("ProductList")
+    if (cartOrOrder === 'cart') {
+
+        // Check for existing cart.
+        const existingCart = await ProductList.createQueryBuilder("ProductList")
+            .where("ProductList.customerId = :customerId", { customerId: customerId })
+            .andWhere("ProductList.type = :type", { type: 'cart' })
+            .getOne();
+
+        if (existingCart) {
+            throw Error('Cart already exists for this customer')
+        }
+
+        else {
+            const cart = ProductList.create({
+                productListProduct: [],
+                type: 'cart',
+                customer: customer,
+                cardNumber: undefined
+            });
+            await cart.save();
+            return cart;
+        }
+    }
+
+    else if (cartOrOrder === 'order') {
+        
+        const foundProductList = await ProductList.createQueryBuilder("ProductList")
+            .where("ProductList.customerId = :customerId", { customerId: customerId })
+            .andWhere("ProductList.type = :type", { type: cartOrOrder })
+            .getOne();
+
+            if (foundProductList) {
+                return foundProductList;
+            }
+            else {
+                throw Error('No existing orders for this customer.')
+            }
+    }
+    else {
+        throw Error('Error occurred while attempting to create cart or oder.')
+    }
+}
+
+// Find a cart or an order.
+export async function findProductList(customerId: number, cartOrOrder: string): Promise<ProductList> {
+
+        const foundProductList = await ProductList.createQueryBuilder("ProductList")
         .where("ProductList.customerId = :customerId", { customerId: customerId })
-        .andWhere("ProductList.type = :type", { type: "cart" })
+        .andWhere("ProductList.type = :type", { type: cartOrOrder })
         .getOne();
-
-        if (!foundProductList) {
-            return undefined
+        if (foundProductList) {
+            return foundProductList;
         }
         else {
-            return foundProductList;
+            if (cartOrOrder === 'cart') {
+                throw Error ('Cart not found for this customer.')
+            }
+            else {
+                throw Error ('Order not found for this customer.')
+            }
         }
 }
 
-// Used to find an existing product in a cart.
+// Gets items in cart or oder.
+export async function getProductListItems(productList: ProductList, cartOrOrder: string): Promise<ProductListProduct[] | undefined> {
+
+    let cartProducts: ProductListProduct[] | undefined;
+    cartProducts = await ProductListProduct.find({ where: { productList: productList } })
+    if (cartProducts) {
+        return cartProducts
+    }
+    else {
+        return undefined;
+    }
+}
+
+// Find an existing product in a cart.
 export async function findProductListProduct(productList: ProductList, product: Product): Promise<ProductListProduct | undefined> {
 
     const foundCartProduct = await ProductListProduct.findOneOrFail({
@@ -30,12 +96,12 @@ export async function findProductListProduct(productList: ProductList, product: 
     return foundCartProduct;
 }
 
-// Used to add products to a cart.
-export async function addToProductList(productList: ProductList, product: Product, quantity: Number): Promise<ProductList | undefined> {
+// Add products to a cart.
+export async function addToCart(productList: ProductList, product: Product, quantity: number): Promise<ProductList | undefined> {
 
     // First look for an existing product with an existing quantity in cart (ProductList).
     // We want to always update an existing quantity (if one exist) for a product in the cart, instead of creating duplicate entries.
-    
+
     let existingProductInCart: ProductListProduct | undefined;
 
     try {
@@ -48,7 +114,7 @@ export async function addToProductList(productList: ProductList, product: Produc
     // If product exists in cart already, just add to the existing quantity and save.
     if (existingProductInCart) {
 
-        existingProductInCart.quantity = Number(existingProductInCart.quantity) + Number(quantity);
+        existingProductInCart.quantity = existingProductInCart.quantity + quantity;
         await ProductListProduct.save(existingProductInCart);
 
         if (productList) {
@@ -80,8 +146,8 @@ export async function addToProductList(productList: ProductList, product: Produc
     return productList;
 }
 
-// Used to remove products from cart.
-export async function removeProductFromProductList(productList: ProductList, product: Product, quantity: Number): Promise<ProductList | undefined> {
+// Remove products from cart.
+export async function removeProductFromCart(productList: ProductList, product: Product, quantity: number): Promise<ProductList> {
 
     try {
         // Find ProductListProduct - product in ProductList (cart).
@@ -110,15 +176,43 @@ export async function removeProductFromProductList(productList: ProductList, pro
             }
         }
 
-        // Product does not exist in cart.
         else {
-            // what should be passed back to the api layer here to indicate that a product does not exist in the cart?
-            return undefined;
+            throw Error ('Product does not exist in cart.')
         }
     }
 
     catch (error) {
-        // error occurred
+        throw Error ('Problem removing product from cart.')
     }
     return productList;
+}
+
+// Checkout cart (updates the ProductList.type from "cart" to "order")
+export async function checkoutCart(customerId: number): Promise<ProductList> {
+
+    let customer: Customer | undefined;
+    let cart: ProductList | undefined;
+    customer = await findCustomer((customerId));
+
+    try {
+        cart = await ProductList.createQueryBuilder("ProductList")
+            .where("ProductList.customerId = :customerId", { customerId: customerId })
+            .andWhere("ProductList.type = :type", { type: "cart" })
+            .getOne();
+
+        if (cart) {
+
+            cart.cardNumber = customer.cardNumber;
+            cart.type = 'order';
+
+            await ProductList.save(cart);
+            return cart;
+        }
+        else {
+            throw Error('Cart not found for this customer.')
+        }
+    }
+    catch (error) {
+        throw Error('Cart not found for this customer.')
+    }
 }

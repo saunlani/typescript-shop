@@ -1,46 +1,18 @@
 import express from 'express';
-import { Product } from "../entities/Product";
+import { getProductsWithDescriptionAndTitle } from '../services/Product';
+import { errorHandler } from './controllers/Error';
+import { validateSchema } from '../middlewares/validateSchema';
+import { getProductsWithDescriptionAndTitleSchema } from '../validations/getProductsWithDescriptionAndTitleSchema';
 
 const router = express.Router();
 
-router.get('/api/products/description_title/', async (req, res) => {
+router.get('/api/products/description_title/', validateSchema(getProductsWithDescriptionAndTitleSchema), errorHandler(async (req, res, next) => {
 
-    // With the request body parameters productDescription and productTitle: attempt to get all matching products.
-    const { productDescription, productTitle } = req.body;
+    const { description, title } = req.body;
 
-    try {
+    let products = await getProductsWithDescriptionAndTitle(description,title);
+    return res.status(200).json(products);
 
-        // Verify all valid parameters are received.
-        if (!productDescription || !productTitle) {
-            return res.status(400).json({ msg: "Valid parameters not provided." });
-        }
-
-        else {
-
-
-            const products = await Product.createQueryBuilder()
-                .select('product')
-                .from(Product, 'product')
-                .where('LOWER(product.description) like LOWER(:productDescription) AND LOWER(product.title) like LOWER(:productTitle)', { productDescription: `%${productDescription}%`, productTitle: `%${productTitle}%` })
-                .getMany();
-
-            // If no matching products are found, notify frontend.
-            if (products.length === 0) {
-                return res.status(404).json({ msg: 'No products exist with this description and title.' });
-            }
-
-            // Otherwise return all matching products.
-            else {
-                return res.status(200).json(products);
-            }
-        }
-    }
-    // Catch any other errors and return it to the frontend.
-    catch (error) {
-        console.error(error)
-        return res.status(500).json({ msg: 'Problem encountered while getting products: ', error });
-    }
-
-})
+}))
 
 export { router as getProductWithDescriptionAndTitleRouter };

@@ -1,7 +1,7 @@
 import express from 'express';
-import { findProduct } from  '../services/Product';
+import { findProductById } from  '../services/Product';
 import { findCustomer } from '../services/Customer';
-import { findProductList, addToProductList } from '../services/ProductList';
+import { findProductList, addToCart } from '../services/ProductList';
 import { validateSchema } from '../middlewares/validateSchema';
 import { addToCartSchema } from '../validations/addToCartSchema';
 import { errorHandler } from './controllers/Error';
@@ -10,25 +10,15 @@ const router = express.Router();
 
 router.post('/api/cart/add/', validateSchema(addToCartSchema), errorHandler(async (req, res, next) => {
 
-    // With the request body parameters: attempt to find a valid product, customer and ProductList (cart).
-    // If one does not exist, return a message to the frontend.
-
     const { customerId, productId, quantity } = req.body;
 
-    const product = await findProduct(productId);
-    const customer = await findCustomer(customerId);
-    const cart = await findProductList(customerId);
+    let customer = await findCustomer(customerId);
+    let product = await findProductById(productId);
+    let cart = await findProductList(customer.id, 'cart');
 
-    if (!cart || !product || !cart) {
-        throw Error('Resource not available')
-        // handle undefined case, possibly throw an error
-    } else {
-        await addToProductList(cart, product, quantity);
-    }
+    await addToCart(cart, product, quantity);
+
     return res.status(201).json({ msg: "Successfully added product(s) to cart: ", cart });
-
 }))
 
-export {
-    router as addToCartRouter
-}
+export { router as addToCartRouter }

@@ -1,15 +1,15 @@
 import * as yup from 'yup';
 
 export const updateProductSchema = yup.object({
-        productId: yup
+        id: yup
             .number()
             .defined(),
-            title: yup
+        title: yup
             .string(),
-            description: yup
+        description: yup
             .string(),
-            photo: yup
+        photo: yup
             .string(),
-            price: yup
-            .number().min(.1)
+        price: yup
+            .number().min(.01)
     });

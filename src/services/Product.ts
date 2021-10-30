@@ -1,34 +1,126 @@
 import { Product } from '../entities/Product'
 
-// Find product
-export async function findProduct(productId: string): Promise<Product | undefined> {
-    let foundProduct = await Product.findOneOrFail(parseInt(productId));
-    return foundProduct;
+// Find product -- can probably update this to replace the other "getProductsWith..." funnctions.
+export async function findProduct(id?: number, title?: string, description?: string, photo?: string, price?: number): Promise<Product> {
+
+    try {
+            let foundProduct = await Product.findOneOrFail(id);
+            return foundProduct;
+    }
+    catch {
+        throw Error('Product not found')
+    }
+}
+
+// Find product by ID.
+export async function findProductById(id: number): Promise<Product> {
+
+    try {
+            let foundProduct = await Product.findOneOrFail(id);
+            return foundProduct;
+    }
+    catch {
+        throw Error('Product not found')
+    }
+}
+
+// Get all products.
+export async function getAllProducts(): Promise<Product[]> {
+
+    let products = await Product.createQueryBuilder()
+        .select('product')
+        .from(Product, 'product')
+        .getMany();
+    return products;
+
+}
+
+// Get products with title.
+export async function getProductsWithTitle(title: string): Promise<Product[]> {
+
+    const foundProducts = await Product.createQueryBuilder()
+        .select('product')
+        .from(Product, 'product')
+        .where('LOWER(product.title) like LOWER(:title)', { title: `%${title}%` })
+        .getMany();
+
+    if (foundProducts.length === 0) {
+        throw Error('No matching products found.')
+    }
+    else {
+        return foundProducts;
+    }
+
+}
+
+// Get products with description
+export async function getProductsWithDescription(description: string): Promise<Product[]> {
+
+    const foundProducts = await Product.createQueryBuilder()
+        .select('product')
+        .from(Product, 'product')
+        .where('LOWER(product.description) like LOWER(:description)', { description: `%${description}%` })
+        .getMany();
+
+    if (foundProducts.length === 0) {
+        throw Error('No matching products found.')
+    }
+    else {
+        return foundProducts;
+    }
+}
+
+// Get products with description and title
+export async function getProductsWithDescriptionAndTitle(description: string, title: string): Promise<Product[]> {
+
+    const foundProducts = await Product.createQueryBuilder()
+        .select('product')
+        .from(Product, 'product')
+        .where('LOWER(product.description) like LOWER(:description) AND LOWER(product.title) like LOWER(:title)', { description: `%${description}%`, title: `%${title}%` })
+        .getMany();
+
+    if (foundProducts.length === 0) {
+        throw Error('No matching products found.')
+    }
+    else {
+        return foundProducts;
+    }
 }
 
 // Updates product.
-export async function updateProduct(productId: string, title?: string, description?: string, photo?: string, price?: Number): Promise<Product | undefined> {
+export async function updateProduct(id: number, title?: string, description?: string, photo?: string, price?: number): Promise<Product> {
 
-    let productToUpdate = await Product.findOneOrFail(parseInt(productId));
-    
-    //  If product valid, make necessary updates.
-    if (productToUpdate) {
-        if (title) {
-            productToUpdate.title = title;
-        }
-        if (description) {
-            productToUpdate.description = description;
-        }
-        if (photo) {
-            productToUpdate.photo = photo;
-        }
-        if (price) {
-            productToUpdate.price = Number(price);
-        }
-        await productToUpdate.save();
-        return productToUpdate
+    let productToUpdate: Product | undefined;
+    try {
+        productToUpdate = await Product.findOneOrFail(id);
     }
-    else {
+    catch (error) {
         throw Error('Product not found.')
+    }
+    if (title) {
+        productToUpdate.title = title;
+    }
+    if (description) {
+        productToUpdate.description = description;
+    }
+    if (photo) {
+        productToUpdate.photo = photo;
+    }
+    if (price) {
+        productToUpdate.price = price;
+    }
+    await productToUpdate.save();
+    return productToUpdate
+}
+
+// Creates product.
+export async function createProduct(title: string, description: string, photo: string, price: number): Promise<Product> {
+    try {
+        const product = Product.create({ title, description, photo, price });
+        await product.save();
+        return product;
+    }
+    catch {
+        throw Error ('Problem creating product.')
     }
 }
