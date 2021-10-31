@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "es6",
+		"target": "esnext",
 		"module": "commonjs",
 		"lib": [
 			"dom",
@@ -10,7 +10,7 @@
 		],
 		"skipLibCheck": true,
 		"sourceMap": true,
-		"outDir": "./dist",
+		"outDir": "./build",
 		"moduleResolution": "node",
 		"removeComments": true,
 		"noImplicitAny": false,

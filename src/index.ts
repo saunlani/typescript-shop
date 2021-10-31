@@ -72,7 +72,7 @@ const main = async () => {
 
     catch (error) {
 
-        console.log("failed to create server:", error)
+        console.log("failed to create server: ", error)
     }
 
 }
