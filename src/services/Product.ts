@@ -4,8 +4,8 @@ import { Product } from '../entities/Product'
 export async function findProduct(id?: number, title?: string, description?: string, photo?: string, price?: number): Promise<Product> {
 
     try {
-            let foundProduct = await Product.findOneOrFail(id);
-            return foundProduct;
+        let foundProduct = await Product.findOneOrFail(id);
+        return foundProduct;
     }
     catch {
         throw Error('Product not found')
@@ -16,8 +16,8 @@ export async function findProduct(id?: number, title?: string, description?: str
 export async function findProductById(id: number): Promise<Product> {
 
     try {
-            let foundProduct = await Product.findOneOrFail(id);
-            return foundProduct;
+        let foundProduct = await Product.findOneOrFail(id);
+        return foundProduct;
     }
     catch {
         throw Error('Product not found')
@@ -31,8 +31,11 @@ export async function getAllProducts(): Promise<Product[]> {
         .select('product')
         .from(Product, 'product')
         .getMany();
-    return products;
 
+    if (products.length === 0) {
+        throw Error('No products found.')
+    }
+    return products;
 }
 
 // Get products with title.
@@ -90,7 +93,7 @@ export async function getProductsWithDescriptionAndTitle(description: string, ti
 // Updates product.
 export async function updateProduct(id: number, title?: string, description?: string, photo?: string, price?: number): Promise<Product> {
 
-    let productToUpdate: Product | undefined;
+    let productToUpdate: Product;
     try {
         productToUpdate = await Product.findOneOrFail(id);
     }
@@ -121,6 +124,6 @@ export async function createProduct(title: string, description: string, photo: s
         return product;
     }
     catch {
-        throw Error ('Problem creating product.')
+        throw Error('Problem creating product.')
     }
 }

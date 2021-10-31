@@ -4,112 +4,121 @@ import { ProductListProduct } from '../entities/ProductListProduct'
 import { ProductListUtility } from '../entities/module/ProductListUtility';
 import { findCustomer } from './Customer';
 import { Customer } from '../entities/Customer';
+import { findProductById } from '../services/Product';
 
-// Find a cart or an order.
-export async function createProductList(customerId: number, cartOrOrder: string): Promise<ProductList> {
+// Create a cart.
+export async function createCart(customerId: number): Promise<ProductList> {
 
-    let customer = await findCustomer((customerId));
+    let customer = await findCustomer(customerId);
 
-    if (cartOrOrder === 'cart') {
+    // Check for existing cart.
+    const existingCart = await ProductList.createQueryBuilder("ProductList")
+        .where("ProductList.customerId = :customerId", { customerId: customer.id })
+        .andWhere("ProductList.type = :type", { type: 'cart' })
+        .getOne();
 
-        // Check for existing cart.
-        const existingCart = await ProductList.createQueryBuilder("ProductList")
-            .where("ProductList.customerId = :customerId", { customerId: customerId })
-            .andWhere("ProductList.type = :type", { type: 'cart' })
-            .getOne();
-
-        if (existingCart) {
-            throw Error('Cart already exists for this customer')
-        }
-
-        else {
-            const cart = ProductList.create({
-                productListProduct: [],
-                type: 'cart',
-                customer: customer,
-                cardNumber: undefined
-            });
-            await cart.save();
-            return cart;
-        }
+    if (existingCart) {
+        throw Error('Cart already exists for this customer')
     }
 
-    else if (cartOrOrder === 'order') {
-        
-        const foundProductList = await ProductList.createQueryBuilder("ProductList")
-            .where("ProductList.customerId = :customerId", { customerId: customerId })
-            .andWhere("ProductList.type = :type", { type: cartOrOrder })
-            .getOne();
+    else {
+        const cart = ProductList.create({
+            productListProduct: [],
+            type: 'cart',
+            customer: customer
+        });
+        await cart.save();
+        return cart;
+    }
+}
 
-            if (foundProductList) {
-                return foundProductList;
-            }
-            else {
-                throw Error('No existing orders for this customer.')
-            }
+// Find a cart by ID
+export async function findCartByCustomerId(customerId: number): Promise<ProductList> {
+
+    const foundCart = await ProductList.createQueryBuilder("ProductList")
+        .where("ProductList.customerId = :customerId", { customerId: customerId })
+        .andWhere("ProductList.type = :type", { type: 'cart' })
+        .getOne();
+    if (foundCart) {
+        return foundCart;
     }
     else {
-        throw Error('Error occurred while attempting to create cart or oder.')
+        throw Error('Cart not found for this customer.')
     }
 }
 
 // Find a cart or an order.
 export async function findProductList(customerId: number, cartOrOrder: string): Promise<ProductList> {
 
-        const foundProductList = await ProductList.createQueryBuilder("ProductList")
+    const foundProductList = await ProductList.createQueryBuilder("ProductList")
         .where("ProductList.customerId = :customerId", { customerId: customerId })
         .andWhere("ProductList.type = :type", { type: cartOrOrder })
         .getOne();
-        if (foundProductList) {
-            return foundProductList;
+    if (foundProductList) {
+        return foundProductList;
+    }
+    else {
+        if (cartOrOrder === 'cart') {
+            throw Error('Cart not found for this customer.')
         }
         else {
-            if (cartOrOrder === 'cart') {
-                throw Error ('Cart not found for this customer.')
-            }
-            else {
-                throw Error ('Order not found for this customer.')
-            }
+            throw Error('Order not found for this customer.')
         }
+    }
+}
+
+export async function findCart(customerId: number): Promise<ProductList> {
+
+    const foundCart = await ProductList.createQueryBuilder("ProductList")
+        .where("ProductList.customerId = :customerId", { customerId: customerId })
+        .andWhere("ProductList.type = :type", { type: 'cart' })
+        .getOne();
+
+    if (foundCart) {
+        return foundCart;
+    }
+    else {
+        throw Error('Cart not found for this customer.')
+    }
 }
 
 // Gets items in cart or oder.
-export async function getProductListItems(productList: ProductList, cartOrOrder: string): Promise<ProductListProduct[] | undefined> {
+export async function getCartItems(productList: ProductList): Promise<ProductListProduct[]> {
 
-    let cartProducts: ProductListProduct[] | undefined;
-    cartProducts = await ProductListProduct.find({ where: { productList: productList } })
-    if (cartProducts) {
-        return cartProducts
-    }
-    else {
-        return undefined;
-    }
+    let cartProducts: ProductListProduct[];
+    cartProducts = await ProductListProduct.find({ where: { productList: productList } });
+    return cartProducts;
 }
 
 // Find an existing product in a cart.
-export async function findProductListProduct(productList: ProductList, product: Product): Promise<ProductListProduct | undefined> {
+export async function findProductListProduct(productList: ProductList, product: Product): Promise<ProductListProduct | null> {
 
-    const foundCartProduct = await ProductListProduct.findOneOrFail({
-        where: { productList: productList, product: product },
-        relations: ['product'],
-    })
-    return foundCartProduct;
+    try {
+        const foundCartProduct = await ProductListProduct.findOneOrFail({
+            where: { productList: productList, product: product },
+            relations: ['product'],
+        })
+        return foundCartProduct;
+    }
+    catch {
+        return null;
+    }
 }
 
 // Add products to a cart.
-export async function addToCart(productList: ProductList, product: Product, quantity: number): Promise<ProductList | undefined> {
+export async function addToCart(customerId: number, productId: number, quantity: number): Promise<ProductList> {
+
+    let customer = await findCustomer(customerId);
+    let product = await findProductById(productId);
+    let cart = await findCartByCustomerId(customer.id);
 
     // First look for an existing product with an existing quantity in cart (ProductList).
     // We want to always update an existing quantity (if one exist) for a product in the cart, instead of creating duplicate entries.
 
-    let existingProductInCart: ProductListProduct | undefined;
+    let existingProductInCart: ProductListProduct | null;
 
-    try {
-        existingProductInCart = await findProductListProduct(productList, product);
-    }
-    catch (error) {
-        // cart does not already contain product
-    }
+    existingProductInCart = await findProductListProduct(cart, product);
+    console.log(existingProductInCart);
 
     // If product exists in cart already, just add to the existing quantity and save.
     if (existingProductInCart) {
@@ -117,33 +126,32 @@ export async function addToCart(productList: ProductList, product: Product, quan
         existingProductInCart.quantity = existingProductInCart.quantity + quantity;
         await ProductListProduct.save(existingProductInCart);
 
-        if (productList) {
+        if (cart) {
 
             // Generate a total cart price with the ProductListUtility module.
-            productList.total = Number(await ProductListUtility.totalPrices(productList))
+            cart.total = Number(await ProductListUtility.totalPrices(cart))
 
             // Update the ProductList (cart).
-            await ProductList.save(productList);
+            await ProductList.save(cart);
         }
     }
     else {
-
         // This cart must not currently contain this product, so create a ProductListProduct (cart item), give it a quantity,
         // save it to the ProductList (cart), then update the total for the ProductList and save it
 
-        await ProductListProduct.create({ productList: productList, product: product, unitPrice: product.price, quantity: Number(quantity) }).save();
+        await ProductListProduct.create({ productList: cart, product: product, unitPrice: product.price, quantity: Number(quantity) }).save();
 
         // Generate a total cart price with the ProductListUtility module.
-        productList.total = Number(await ProductListUtility.totalPrices(productList))
+        cart.total = Number(await ProductListUtility.totalPrices(cart))
 
         // Save the updated ProductList (cart).
-        await ProductList.save(productList);
+        await ProductList.save(cart);
 
         // Verify ProductList (cart) has updated and return it to the frontend.
-        const updatedCart = await ProductList.findOne(productList.id, { relations: ["productListProduct"] });
+        const updatedCart = await findProductList(cart.id, 'cart');
         return updatedCart;
     }
-    return productList;
+    return cart;
 }
 
 // Remove products from cart.
@@ -177,42 +185,28 @@ export async function removeProductFromCart(productList: ProductList, product: P
         }
 
         else {
-            throw Error ('Product does not exist in cart.')
+            throw Error('Product does not exist in cart.')
         }
     }
 
     catch (error) {
-        throw Error ('Problem removing product from cart.')
+        throw Error('Problem removing product from cart.')
     }
     return productList;
 }
 
-// Checkout cart (updates the ProductList.type from "cart" to "order")
-export async function checkoutCart(customerId: number): Promise<ProductList> {
-
-    let customer: Customer | undefined;
-    let cart: ProductList | undefined;
-    customer = await findCustomer((customerId));
+// Create order with existing cart. (updates the ProductList.type from "cart" to "order")
+export async function createOrder(customerId: number): Promise<ProductList> {
 
     try {
-        cart = await ProductList.createQueryBuilder("ProductList")
-            .where("ProductList.customerId = :customerId", { customerId: customerId })
-            .andWhere("ProductList.type = :type", { type: "cart" })
-            .getOne();
-
-        if (cart) {
-
-            cart.cardNumber = customer.cardNumber;
-            cart.type = 'order';
-
-            await ProductList.save(cart);
-            return cart;
-        }
-        else {
-            throw Error('Cart not found for this customer.')
-        }
+        let customer = await findCustomer(customerId);
+        let cart = await findCart(customer.id)
+        cart.cardNumber = customer.cardNumber;
+        cart.type = 'order';
+        await ProductList.save(cart);
+        return cart;
     }
-    catch (error) {
-        throw Error('Cart not found for this customer.')
+    catch {
+        throw Error('Cart with items not found for this customer.')
     }
 }

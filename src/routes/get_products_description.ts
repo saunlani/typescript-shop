@@ -1,5 +1,4 @@
 import express from 'express';
-import { Product } from "../entities/Product";
 import { getProductsWithDescription } from '../services/Product';
 import { errorHandler } from './controllers/Error';
 import { validateSchema } from '../middlewares/validateSchema';
@@ -9,9 +8,9 @@ const router = express.Router();
 
 router.get('/api/products/description/', validateSchema(getProductsWithDescriptionSchema), errorHandler(async (req, res, next) => {
 
-    const { descriptipn } = req.body;
+    const { description } = req.body;
 
-    let product = await getProductsWithDescription(descriptipn);
+    let product = await getProductsWithDescription(description);
     return res.status(200).json(product);
 }))
 

@@ -13,7 +13,7 @@ export const updateCustomerSchema = yup.object({
         email: yup
         .string(),
         cardNumber: yup
-        .number().test(
+        .string().test(
             "maxDigits",
             "Card number must have exactly 16 digits",
             (number) => String(number).length === 16

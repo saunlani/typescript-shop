@@ -9,7 +9,7 @@ const router = express.Router();
 router.post("/api/product", validateSchema(createProductSchema), errorHandler(async (req, res, next) => {
 
     const { title, description, photo, price } = req.body;
-    const product = createProduct(title, description, photo, price);
+    const product = await createProduct(title, description, photo, price);
 
     return res.status(201).json({ msg: "Product successfully created: ", product });
 }))

@@ -11,10 +11,10 @@ export const createCustomerSchema = yup.object({
         .string()
         .defined(),
         cardNumber: yup
-        .number().test(
+        .string().test(
             "maxDigits",
             "Card number must have exactly 16 digits",
-            (number) => String(number).length === 16
+            (string) => String(string).length === 16
           )        
           .defined(),
 });
