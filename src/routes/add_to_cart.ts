@@ -1,7 +1,5 @@
 import express from 'express';
-import { findProductById } from  '../services/Product';
-import { findCustomer } from '../services/Customer';
-import { findProductList, addToCart } from '../services/ProductList';
+import { addToCart } from '../services/ProductList';
 import { validateSchema } from '../middlewares/validateSchema';
 import { addToCartSchema } from '../validations/addToCartSchema';
 import { errorHandler } from './controllers/Error';

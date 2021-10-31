@@ -1,5 +1,4 @@
-
-    // passes errors to express error middleware
+// passes errors to express error middleware
 export const errorHandler = (fn) => async (req, res, next) => {
     try {
       await fn(req, res, next);

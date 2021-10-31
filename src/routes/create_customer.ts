@@ -1,5 +1,4 @@
 import express from 'express';
-import { Customer } from '../entities/Customer'
 import { validateSchema } from '../middlewares/validateSchema';
 import { createCustomerSchema } from '../validations/createCustomerSchema';
 import { errorHandler } from './controllers/Error';

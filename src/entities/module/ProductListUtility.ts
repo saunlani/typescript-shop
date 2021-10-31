@@ -1,6 +1,5 @@
 import { ProductListProduct } from "../ProductListProduct"
 import { ProductList } from "../ProductList";
-import { convertCompilerOptionsFromJson } from "typescript";
 
 // This module is to be use/re-used for any redundant tasks related to processing ProductLists as carts and/or orders.
 
@@ -9,7 +8,6 @@ export module ProductListUtility {
     // Accept a ProductList and create a total/sum.
 
     export async function totalPrices(cart: ProductList) {
-
 
         const cartProducts = await ProductListProduct.find({
             where: { productList: cart },

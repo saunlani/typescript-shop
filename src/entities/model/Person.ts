@@ -1,5 +1,4 @@
 import { BaseEntity, Entity, Column, PrimaryGeneratedColumn } from "typeorm";
-import { BlockLike } from "typescript";
 
 @Entity()
 export class Person extends BaseEntity {

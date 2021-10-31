@@ -1,7 +1,7 @@
 import express from 'express';
 import { getAllProducts } from '../services/Product';
 import { errorHandler } from './controllers/Error';
-//
+
 const router = express.Router();
 
 router.get('/api/products', errorHandler(async (req, res, next) => {

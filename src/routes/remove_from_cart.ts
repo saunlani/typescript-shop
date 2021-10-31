@@ -1,7 +1,7 @@
 import express from 'express';
 import { findProductById } from '../services/Product';
 import { findCustomer } from '../services/Customer';
-import { findProductList, removeProductFromCart } from '../services/ProductList';
+import { findCart, removeProductFromCart } from '../services/ProductList';
 import { validateSchema } from '../middlewares/validateSchema';
 import { removeFromCartSchema } from '../validations/removeFromCartSchema';
 import { errorHandler } from './controllers/Error';
@@ -14,7 +14,7 @@ router.post('/api/cart/remove/', validateSchema(removeFromCartSchema), errorHand
 
     let product = await findProductById(productId);
     let customer = await findCustomer(customerId);
-    let cart = await findProductList(customer.id, 'cart');
+    let cart = await findCart(customer.id);
 
     let updatedCart = await removeProductFromCart(cart, product, quantity);
 
