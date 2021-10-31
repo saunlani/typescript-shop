@@ -90,7 +90,7 @@ export async function getProductsWithDescriptionAndTitle(description: string, ti
     }
 }
 
-// Updates product.
+// Update product.
 export async function updateProduct(id: number, title?: string, description?: string, photo?: string, price?: number): Promise<Product> {
 
     let productToUpdate: Product;
@@ -116,7 +116,7 @@ export async function updateProduct(id: number, title?: string, description?: st
     return productToUpdate
 }
 
-// Creates product.
+// Create product.
 export async function createProduct(title: string, description: string, photo: string, price: number): Promise<Product> {
     try {
         const product = Product.create({ title, description, photo, price });

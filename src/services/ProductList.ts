@@ -3,7 +3,6 @@ import { ProductList } from '../entities/ProductList'
 import { ProductListProduct } from '../entities/ProductListProduct'
 import { ProductListUtility } from '../entities/module/ProductListUtility';
 import { findCustomer } from './Customer';
-import { Customer } from '../entities/Customer';
 import { findProductById } from '../services/Product';
 
 // Create a cart.
@@ -32,7 +31,7 @@ export async function createCart(customerId: number): Promise<ProductList> {
     }
 }
 
-// Find a cart by ID
+// Find a cart by Customer ID
 export async function findCartByCustomerId(customerId: number): Promise<ProductList> {
 
     const foundCart = await ProductList.createQueryBuilder("ProductList")
@@ -47,26 +46,7 @@ export async function findCartByCustomerId(customerId: number): Promise<ProductL
     }
 }
 
-// Find a cart or an order.
-export async function findProductList(customerId: number, cartOrOrder: string): Promise<ProductList> {
-
-    const foundProductList = await ProductList.createQueryBuilder("ProductList")
-        .where("ProductList.customerId = :customerId", { customerId: customerId })
-        .andWhere("ProductList.type = :type", { type: cartOrOrder })
-        .getOne();
-    if (foundProductList) {
-        return foundProductList;
-    }
-    else {
-        if (cartOrOrder === 'cart') {
-            throw Error('Cart not found for this customer.')
-        }
-        else {
-            throw Error('Order not found for this customer.')
-        }
-    }
-}
-
+// Find a cart.
 export async function findCart(customerId: number): Promise<ProductList> {
 
     const foundCart = await ProductList.createQueryBuilder("ProductList")
@@ -82,7 +62,7 @@ export async function findCart(customerId: number): Promise<ProductList> {
     }
 }
 
-// Gets items in cart or oder.
+// Gets items in cart.
 export async function getCartItems(productList: ProductList): Promise<ProductListProduct[]> {
 
     let cartProducts: ProductListProduct[];
@@ -91,7 +71,7 @@ export async function getCartItems(productList: ProductList): Promise<ProductLis
 }
 
 // Find an existing product in a cart.
-export async function findProductListProduct(productList: ProductList, product: Product): Promise<ProductListProduct | null> {
+export async function findCartItem(productList: ProductList, product: Product): Promise<ProductListProduct | null> {
 
     try {
         const foundCartProduct = await ProductListProduct.findOneOrFail({
@@ -117,7 +97,7 @@ export async function addToCart(customerId: number, productId: number, quantity:
 
     let existingProductInCart: ProductListProduct | null;
 
-    existingProductInCart = await findProductListProduct(cart, product);
+    existingProductInCart = await findCartItem(cart, product);
     console.log(existingProductInCart);
 
     // If product exists in cart already, just add to the existing quantity and save.
@@ -148,7 +128,7 @@ export async function addToCart(customerId: number, productId: number, quantity:
         await ProductList.save(cart);
 
         // Verify ProductList (cart) has updated and return it to the frontend.
-        const updatedCart = await findProductList(cart.id, 'cart');
+        const updatedCart = await findCart(cart.id);
         return updatedCart;
     }
     return cart;
