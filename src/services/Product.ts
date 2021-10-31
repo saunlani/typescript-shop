@@ -32,9 +32,6 @@ export async function getAllProducts(): Promise<Product[]> {
         .from(Product, 'product')
         .getMany();
 
-    if (products.length === 0) {
-        throw Error('No products found.')
-    }
     return products;
 }
 
@@ -47,13 +44,7 @@ export async function getProductsWithTitle(title: string): Promise<Product[]> {
         .where('LOWER(product.title) like LOWER(:title)', { title: `%${title}%` })
         .getMany();
 
-    if (foundProducts.length === 0) {
-        throw Error('No matching products found.')
-    }
-    else {
         return foundProducts;
-    }
-
 }
 
 // Get products with description
@@ -64,13 +55,7 @@ export async function getProductsWithDescription(description: string): Promise<P
         .from(Product, 'product')
         .where('LOWER(product.description) like LOWER(:description)', { description: `%${description}%` })
         .getMany();
-
-    if (foundProducts.length === 0) {
-        throw Error('No matching products found.')
-    }
-    else {
         return foundProducts;
-    }
 }
 
 // Get products with description and title
@@ -81,13 +66,7 @@ export async function getProductsWithDescriptionAndTitle(description: string, ti
         .from(Product, 'product')
         .where('LOWER(product.description) like LOWER(:description) AND LOWER(product.title) like LOWER(:title)', { description: `%${description}%`, title: `%${title}%` })
         .getMany();
-
-    if (foundProducts.length === 0) {
-        throw Error('No matching products found.')
-    }
-    else {
         return foundProducts;
-    }
 }
 
 // Update product.

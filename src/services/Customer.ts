@@ -48,10 +48,7 @@ export async function getCustomers(): Promise<Customer[]> {
     .select('customer')
     .from(Customer, 'customer')
     .getMany()
-
-  if (customers.length === 0) {
-    throw Error('No products found.')
-  }
+    
   return customers;
 }
 
