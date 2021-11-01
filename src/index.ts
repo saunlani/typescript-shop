@@ -30,11 +30,11 @@ const main = async () => {
 
         await createConnection({
             type: "postgres",
-            host: process.env.dbHost,
-            port: Number(process.env.dbPort),
-            username: process.env.dbUsername,
-            password: process.env.dbPassword,
-            database: process.env.dbDatabaseName,
+            host: process.env.DBHOST,
+            port: Number(process.env.PGPORT),
+            username: process.env.DBUSER,
+            password: process.env.DBPASS,
+            database: process.env.DB,
             entities: [Customer, Product, ProductList, ProductListProduct],
             synchronize: true
         })
@@ -62,8 +62,8 @@ const main = async () => {
         app.use(getCartRouter);
         app.use(updateCustomerRouter);
         app.use(updateProductRouter);
-        app.listen(process.env.serverPort, () => {
-            console.log("server now running on port:", process.env.serverPort)
+        app.listen(process.env.SERVERPORT, () => {
+            console.log("server now running on port:", process.env.SERVERPORT)
         })
         app.use(function (err, req, res, next) {
             res.status(500).json({ 'msg': err.message })

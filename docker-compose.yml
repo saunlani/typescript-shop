@@ -1,7 +1,32 @@
 version: '3.7'
 
 services:
-  ts-node-docker:
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_PASSWORD: myosrules
+      POSTGRES_USER: postgres
+      POSTGRES_DB: shopdb
+      PGDATA: /tmp
+      PGPORT: 5433
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5433:5432'
+  web:
+    image: ts-node-docker
+    depends_on:
+      - postgres
+    environment:
+      DBHOST: postgres
+      DBUSER: postgres
+      DBPASS: myosrules
+      DB: shopdb
+      SERVERPORT: 8181
+      PGPORT: 5433
+      DBTYPE: postgres
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,8 +35,6 @@ services:
       - ./src:/home/node/app/src
       - ./nodemon.json:/home/node/app/nodemon.json
     container_name: ts-node-docker
-    expose:
-      - '8181'
     ports:
       - '8181:8181'
     command: npm run dev

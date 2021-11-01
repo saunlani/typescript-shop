@@ -24,6 +24,9 @@ This is an online shop that has the following features:
 8.) As a means of convenience, a Postman JSON file containing example route usage has been provided in /postman: "ts-shop-db.postman_collection.json"
 9.) Use the provided Postman file to explore the functionality of the app.
 
+*** Alternatively, Docker can be installed and used with this application.
+docker-compose.yml has been provided for a dev instance.  simply run "make up" and docker will compose the application.
+
 
 Some potential additions for consideration:
 - uuid's instead of id's.
