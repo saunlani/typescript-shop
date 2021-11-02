@@ -3,16 +3,10 @@ import { Customer } from '../entities/Customer';
 // Check for an existing email associated with a customer.
 export async function checkForExistingEmail(email: string): Promise<boolean> {
 
-  const existingCustomer = await Customer.createQueryBuilder("Customer")
+  const doesCustomerExist = await Customer.createQueryBuilder("Customer")
     .where("Customer.email = :email", { email: email })
     .getOne();
-
-  if (existingCustomer) {
-    return true;
-  }
-  else {
-    return false;
-  }
+    return !!doesCustomerExist
 }
 
 // Create a customer.
@@ -23,11 +17,9 @@ export async function createCustomer(firstName: string, lastName: string, email:
   if (existingEmail) {
     throw Error("Customer not created. A customer with this email already exists.");
   }
-  else {
     const customer = Customer.create({ firstName, lastName, email, active: true, cardNumber });
     await customer.save();
     return customer;
-  }
 }
 
 // Find individual customer.
