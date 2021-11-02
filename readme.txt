@@ -1,5 +1,3 @@
-Hello! Thank you very much for taking the time to review this backend coding project.
-
 This application utilizes Node.js, TypeScript, TypeORM and Postgres.
 
 This is an online shop that has the following features:
